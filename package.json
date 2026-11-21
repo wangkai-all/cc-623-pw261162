@@ -1,0 +1,14 @@
+{
+  "name": "filter-life-ledger",
+  "version": "1.0.0",
+  "private": true,
+  "description": "滤芯寿命台账：更换、负载、洗液余量分表记录，按右删失估计寿命并比较日龄/工作小时口径",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

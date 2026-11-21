@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>滤芯寿命台账</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>滤芯寿命台账</h1>
+        <p class="sub">滤芯更换、机器负载、洗液余量分开记录；换机后同批号也重新起算寿命。</p>
+      </div>
+      <div class="clock">
+        <span id="today">--</span>
+        <span id="machine-count" class="pill">-- 台设备</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="panel actions" aria-labelledby="actions-title">
+        <h2 id="actions-title">操作</h2>
+        <div class="action-grid">
+          <article class="card">
+            <h3>1. 估计原耗材寿命</h3>
+            <p class="hint">已结束寿命作为事件，仍在用按右删失计入风险集，不当作已失效。</p>
+            <label>
+              负载口径
+              <select id="basis">
+                <option value="days">日龄（天）</option>
+                <option value="hours">工作小时</option>
+                <option value="tons">处理吨数</option>
+              </select>
+            </label>
+            <button id="btn-estimate" type="button">估计寿命</button>
+            <p id="estimate-status" class="status" role="status">尚未计算</p>
+          </article>
+
+          <article class="card">
+            <h3>2. 补录更换工单</h3>
+            <p class="hint">迟到工单先进入待应用列表；应用时保留旧估计与新估计两套结果。</p>
+            <form id="wo-form">
+              <label>
+                设备
+                <select id="wo-machine" required></select>
+              </label>
+              <label>
+                滤芯编号
+                <input id="wo-filter" required maxlength="64" placeholder="如 F-101-05" />
+              </label>
+              <div class="row">
+                <label>
+                  安装日期
+                  <input id="wo-installed" type="date" required />
+                </label>
+                <label>
+                  更换日期
+                  <input id="wo-removed" type="date" required />
+                </label>
+              </div>
+              <label>
+                运行小时数（可选，留空按负载表折算）
+                <input id="wo-hours" type="number" min="0" step="1" placeholder="留空自动折算" />
+              </label>
+              <label>
+                更换原因
+                <input id="wo-reason" maxlength="120" value="迟到更换单补录" />
+              </label>
+              <button type="submit">补录工单</button>
+              <p id="wo-status" class="status" role="status">填写后提交</p>
+            </form>
+          </article>
+
+          <article class="card">
+            <h3>3. 查看负载和样本边界</h3>
+            <p class="hint">对照相同日龄窗口与按工作小时配齐，检查口径是否会改变结论。</p>
+            <button id="btn-compare" type="button" class="secondary">比较两种口径</button>
+            <button id="btn-boundaries" type="button" class="secondary">刷新边界明细</button>
+            <p id="compare-status" class="status" role="status">尚未比较</p>
+            <div id="compare-table" class="table-wrap"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel evidence-panel">
+        <div class="panel-head">
+          <h2>业务结果</h2>
+          <span id="evidence-status" class="pill" data-evidence-status="idle">idle</span>
+        </div>
+        <p class="hint">
+          本区域带 <code>data-evidence-result</code> 属性，值为「动作|状态|摘要哈希」，每次操作都会刷新；完整 JSON 摘要见下方。另带
+          <code>data-last-action</code>，便于核对操作前后的内容。
+        </p>
+        <div id="evidence" data-evidence-result="idle|ok|00000000" data-last-action="init">
+          <pre id="evidence-text">等待操作…</pre>
+        </div>
+      </section>
+
+      <section class="panel" id="estimate-panel" hidden>
+        <h2>寿命估计</h2>
+        <div id="estimate-summary" class="summary-grid"></div>
+        <h3>在用滤芯预计更换日期</h3>
+        <div id="projection-table" class="table-wrap"></div>
+        <h3>样本（每条代表一次寿命，不按批号合并）</h3>
+        <div id="sample-table" class="table-wrap"></div>
+        <details>
+          <summary>Kaplan–Meier 台阶表</summary>
+          <div id="km-table" class="table-wrap"></div>
+        </details>
+      </section>
+
+      <section class="panel" id="boundary-panel">
+        <h2>负载、洗液与样本边界</h2>
+        <div id="machine-cards" class="machine-grid"></div>
+      </section>
+
+      <section class="panel" id="order-panel">
+        <h2>更换工单与旧/新估计</h2>
+        <div id="order-list" class="table-wrap"></div>
+        <div id="replacement-list"></div>
+      </section>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
